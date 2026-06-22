@@ -14,7 +14,11 @@ const adminAuth = (req, res, next) => {
 
 router.use(adminAuth);
 
+router.get('/problems', adminController.getProblems);
+router.get('/problems/:id', adminController.getProblem);
 router.post('/problems', adminController.createProblem);
+router.put('/problems/:id', adminController.updateProblem);
+router.delete('/problems/:id', adminController.deleteProblem);
 router.post('/problems/:id/testcases', adminController.addTestCase);
 
 module.exports = router;

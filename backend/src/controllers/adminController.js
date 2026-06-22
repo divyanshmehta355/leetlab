@@ -33,6 +33,68 @@ class AdminController {
       next(error);
     }
   }
+  async getProblems(req, res, next) {
+    try {
+      const result = await pool.query('SELECT id, title, slug, difficulty, created_at FROM problems ORDER BY id DESC');
+      res.status(200).json(result.rows);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getProblem(req, res, next) {
+    try {
+      const { id } = req.params;
+      const problemRes = await pool.query('SELECT * FROM problems WHERE id = $1', [id]);
+      if (problemRes.rows.length === 0) return res.status(404).json({ error: 'Problem not found' });
+      
+      const testcaseRes = await pool.query('SELECT * FROM test_cases WHERE problem_id = $1', [id]);
+      
+      const problem = problemRes.rows[0];
+      problem.testcases = testcaseRes.rows;
+      res.status(200).json(problem);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateProblem(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { title, slug, difficulty, description, starter_code, runner_boilerplate_js } = req.body;
+      
+      const result = await pool.query(
+        'UPDATE problems SET title=$1, slug=$2, difficulty=$3, description=$4, starter_code=$5, runner_boilerplate_js=$6 WHERE id=$7 RETURNING *',
+        [title, slug, difficulty, description, starter_code, runner_boilerplate_js, id]
+      );
+      
+      if (result.rows.length === 0) return res.status(404).json({ error: 'Problem not found' });
+      
+      // Delete old testcases
+      await pool.query('DELETE FROM test_cases WHERE problem_id = $1', [id]);
+      
+      await redis.del('problems:all');
+      await redis.del(`problem:${slug}`);
+      res.status(200).json(result.rows[0]);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteProblem(req, res, next) {
+    try {
+      const { id } = req.params;
+      const result = await pool.query('DELETE FROM problems WHERE id = $1 RETURNING slug', [id]);
+      
+      if (result.rows.length === 0) return res.status(404).json({ error: 'Problem not found' });
+      
+      await redis.del('problems:all');
+      await redis.del(`problem:${result.rows[0].slug}`);
+      res.status(200).json({ message: 'Problem deleted successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new AdminController();
