@@ -6,6 +6,7 @@ import { CheckCircle, Circle } from 'lucide-react';
 const ProblemSetPage = () => {
   const [problems, setProblems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchProblems = async () => {
@@ -30,11 +31,27 @@ const ProblemSetPage = () => {
     }
   };
 
+  const filteredProblems = problems.filter(problem => 
+    problem.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    problem.difficulty.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="max-w-6xl mx-auto w-full p-8 flex flex-col gap-6">
-      <div className="mb-4">
-        <h1 className="text-3xl font-bold text-white mb-2">Problem Set</h1>
-        <p className="text-slate-400">Enhance your skills by solving our curated list of algorithmic challenges.</p>
+      <div className="mb-4 flex justify-between items-end">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Problem Set</h1>
+          <p className="text-slate-400">Enhance your skills by solving our curated list of algorithmic challenges.</p>
+        </div>
+        <div className="w-64">
+          <input 
+            type="text" 
+            placeholder="Search problems..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-[#0f111a] border border-white/10 rounded-lg p-2.5 text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all placeholder-slate-500"
+          />
+        </div>
       </div>
 
       {loading ? (
@@ -53,7 +70,7 @@ const ProblemSetPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/50">
-              {problems.map((problem, idx) => (
+              {filteredProblems.map((problem, idx) => (
                 <tr key={problem.id} className="hover:bg-slate-800/40 transition-colors group">
                   <td className="py-4 px-6 text-center">
                     {/* Mocked Status: Using empty circle for unsolved */}
@@ -64,7 +81,7 @@ const ProblemSetPage = () => {
                       to={`/problems/${problem.slug}`} 
                       className="text-white hover:text-cyan-400 font-medium transition-colors"
                     >
-                      {idx + 1}. {problem.title}
+                      {problems.findIndex(p => p.id === problem.id) + 1}. {problem.title}
                     </Link>
                   </td>
                   <td className="py-4 px-6 text-slate-300">
@@ -77,10 +94,10 @@ const ProblemSetPage = () => {
                 </tr>
               ))}
               
-              {problems.length === 0 && (
+              {filteredProblems.length === 0 && (
                 <tr>
                   <td colSpan="4" className="py-12 text-center text-slate-500">
-                    No problems found. Check the Admin panel.
+                    {problems.length === 0 ? 'No problems found. Check the Admin panel.' : 'No problems match your search.'}
                   </td>
                 </tr>
               )}
