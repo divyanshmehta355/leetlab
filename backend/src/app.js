@@ -34,16 +34,4 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// Serve frontend in production
-if (process.env.NODE_ENV === 'production') {
-  const path = require('path');
-  // Serve static files from the React frontend app
-  app.use(express.static(path.join(__dirname, '../../../frontend/dist')));
-  
-  // Anything that doesn't match the API routes should be handled by React Router
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../../frontend/dist/index.html'));
-  });
-}
-
 module.exports = app;
