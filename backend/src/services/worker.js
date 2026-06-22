@@ -13,9 +13,36 @@ const worker = new Worker('submissions', async job => {
 
   try {
     const testCases = await submissionRepository.getTestCasesForProblem(problemId);
+    
+    // Fetch problem slug to know which function to call
+    const { pool } = require('../config/db');
+    const problemRes = await pool.query('SELECT slug FROM problems WHERE id = $1', [problemId]);
+    const slug = problemRes.rows[0].slug;
+
+    // Dynamically inject the runner boilerplate so the user doesn't have to see it or risk deleting it
+    let finalCode = code;
+    if (language === 'javascript') {
+      if (slug === 'two-sum') {
+        finalCode += `\n
+const fs = require('fs');
+const input = fs.readFileSync('/dev/stdin', 'utf-8').trim().split('\\n');
+if (input.length >= 2) {
+  const result = twoSum(JSON.parse(input[0]), JSON.parse(input[1]));
+  if (result !== undefined) console.log(JSON.stringify(result).replace(/,/g, ', '));
+}`;
+      } else if (slug === 'valid-palindrome') {
+        finalCode += `\n
+const fs = require('fs');
+const input = fs.readFileSync('/dev/stdin', 'utf-8').trim();
+if (input) {
+  const result = isPalindrome(JSON.parse(input));
+  if (result !== undefined) console.log(result);
+}`;
+      }
+    }
 
     for (const testCase of testCases) {
-      const result = await jdoodleExecutionService.execute(language, code, testCase.input);
+      const result = await jdoodleExecutionService.execute(language, finalCode, testCase.input);
 
       if (result.exitCode !== 0) {
         finalStatus = 'Error';
