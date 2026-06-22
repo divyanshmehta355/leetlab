@@ -1,0 +1,39 @@
+-- 01_init.sql
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS problems (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  slug VARCHAR(255) UNIQUE NOT NULL,
+  difficulty VARCHAR(20) NOT NULL, -- Easy, Medium, Hard
+  description TEXT NOT NULL,
+  starter_code TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS test_cases (
+  id SERIAL PRIMARY KEY,
+  problem_id INTEGER REFERENCES problems(id) ON DELETE CASCADE,
+  input TEXT NOT NULL,
+  expected_output TEXT NOT NULL,
+  is_hidden BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS submissions (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  problem_id INTEGER REFERENCES problems(id) ON DELETE CASCADE,
+  language VARCHAR(50) NOT NULL,
+  code TEXT NOT NULL,
+  status VARCHAR(50) DEFAULT 'Pending', -- Pending, Accepted, Wrong Answer, Error
+  execution_time_ms INTEGER,
+  memory_used_kb INTEGER,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
