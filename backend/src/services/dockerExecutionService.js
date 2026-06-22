@@ -18,17 +18,20 @@ class DockerExecutionService {
     if (language === 'python') {
       fileName = 'solution.py';
       image = 'python:3.9-slim';
-      runCmd = ['python', `/app/${fileName}`];
+      runCmd = ['sh', '-c', `python /app/${fileName} < /app/input.txt`];
     } else if (language === 'javascript') {
       fileName = 'solution.js';
       image = 'node:18-alpine';
-      runCmd = ['node', `/app/${fileName}`];
+      runCmd = ['sh', '-c', `node /app/${fileName} < /app/input.txt`];
     } else {
       throw new Error(`Unsupported language: ${language}`);
     }
 
     const filePath = path.join(tempDir, fileName);
     await fs.writeFile(filePath, code);
+
+    const inputPath = path.join(tempDir, 'input.txt');
+    await fs.writeFile(inputPath, input || '');
 
     try {
       // Ensure image exists
@@ -47,44 +50,39 @@ class DockerExecutionService {
           Memory: 256 * 1024 * 1024, // 256MB limit
           NetworkMode: 'none', // Disable network access
         },
-        Tty: false,
-        AttachStdout: true,
-        AttachStderr: true,
-        OpenStdin: true,
-        StdinOnce: true
+        Tty: false
       });
 
       await container.start();
-
-      // Write input to stdin if provided
-      if (input) {
-        const stream = await container.attach({stream: true, stdin: true, stdout: true, stderr: true});
-        stream.write(input + '\\n');
-        stream.end();
-      }
-
-      // Wait for container to exit with a timeout
-      // Note: A real implementation needs more robust timeout handling
       const result = await container.wait();
 
-      const logs = await container.logs({
-        stdout: true,
-        stderr: true
+      const logsStream = await container.logs({ stdout: true, stderr: true, follow: false });
+      
+      let parsedLogs = '';
+      let parsedErr = '';
+      
+      // logsStream from follow: false is a Buffer, but dockerode docs say it can be a stream.
+      // If it's a stream (buffer has no length), we must demux it. 
+      // Actually, if we use callback, it is a Buffer. Let's use the callback approach for safety.
+      const logsBuffer = await new Promise((resolve, reject) => {
+        container.logs({ stdout: true, stderr: true, follow: false }, (err, buffer) => {
+          if (err) return reject(err);
+          resolve(buffer);
+        });
       });
 
-      // Simple parsing of docker logs (multiplexed stream)
-      // Docker attaches an 8-byte header to each log line.
-      // We will just do a rough clean for this example, but in prod you'd use docker-modem demux.
-      let outputBuffer = Buffer.from(logs);
-      let parsedLogs = '';
-      let offset = 0;
-      while (offset < outputBuffer.length) {
-        // header is 8 bytes
-        // type = outputBuffer[offset]
-        let length = outputBuffer.readUInt32BE(offset + 4);
-        offset += 8;
-        parsedLogs += outputBuffer.toString('utf8', offset, offset + length);
-        offset += length;
+      // Simple parse of 8-byte headers
+      if (logsBuffer && logsBuffer.length > 0) {
+        let offset = 0;
+        while (offset < logsBuffer.length) {
+          const type = logsBuffer[offset];
+          const length = logsBuffer.readUInt32BE(offset + 4);
+          offset += 8;
+          const content = logsBuffer.toString('utf8', offset, offset + length);
+          if (type === 1) parsedLogs += content;
+          if (type === 2) parsedErr += content;
+          offset += length;
+        }
       }
 
       await container.remove();
@@ -92,7 +90,7 @@ class DockerExecutionService {
 
       return {
         exitCode: result.StatusCode,
-        output: parsedLogs.trim()
+        output: (parsedLogs || parsedErr).trim()
       };
 
     } catch (error) {
