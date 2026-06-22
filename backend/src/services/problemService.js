@@ -2,22 +2,21 @@ const problemRepository = require('../repositories/problemRepository');
 const redis = require('../config/redis');
 
 class ProblemService {
-  async getAllProblems() {
-    const cacheKey = 'problems:all';
+  async getAllProblems(page = 1, limit = 20, search = '', difficulty = '') {
+    // Build a unique cache key incorporating all query params
+    const cacheKey = `problems:page=${page}:limit=${limit}:search=${search}:difficulty=${difficulty}`;
     
-    // Try to get from cache
-    const cachedProblems = await redis.get(cacheKey);
-    if (cachedProblems) {
-      return JSON.parse(cachedProblems);
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
     }
 
-    // Fetch from DB
-    const problems = await problemRepository.findAll();
+    const result = await problemRepository.findPaginated(page, limit, search, difficulty);
     
-    // Store in cache for 1 hour
-    await redis.set(cacheKey, JSON.stringify(problems), 'EX', 3600);
+    // Cache for 10 minutes
+    await redis.set(cacheKey, JSON.stringify(result), 'EX', 600);
     
-    return problems;
+    return result;
   }
 
   async getProblemBySlug(slug) {

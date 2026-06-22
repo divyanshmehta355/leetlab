@@ -3,8 +3,13 @@ const problemService = require('../services/problemService');
 class ProblemController {
   async getProblems(req, res, next) {
     try {
-      const problems = await problemService.getAllProblems();
-      res.status(200).json(problems);
+      const page = Math.max(1, parseInt(req.query.page) || 1);
+      const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
+      const search = req.query.search || '';
+      const difficulty = req.query.difficulty || '';
+
+      const result = await problemService.getAllProblems(page, limit, search, difficulty);
+      res.status(200).json(result);
     } catch (error) {
       next(error);
     }
