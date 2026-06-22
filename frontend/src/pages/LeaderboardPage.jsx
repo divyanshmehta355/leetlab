@@ -126,6 +126,4 @@ const LeaderboardPage = () => {
   );
 };
 
-// Also import Loader2 which was used
-import { Loader2 } from 'lucide-react';
 export default LeaderboardPage;
