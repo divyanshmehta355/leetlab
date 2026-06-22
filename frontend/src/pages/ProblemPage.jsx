@@ -19,13 +19,24 @@ const ProblemPage = () => {
       try {
         const response = await api.get(`/problems/${slug}`);
         setProblem(response.data);
-        setCode(response.data.starter_code || '// Write your code here\n');
+        const starter = response.data.starter_codes?.javascript || '// Write your code here\n';
+        setCode(starter);
       } catch (err) {
         setError('Problem not found.');
       }
     };
     fetchProblem();
   }, [slug]);
+
+  const handleLanguageChange = (e) => {
+    const newLang = e.target.value;
+    setLanguage(newLang);
+    if (problem && problem.starter_codes && problem.starter_codes[newLang]) {
+      setCode(problem.starter_codes[newLang]);
+    } else {
+      setCode('// Write your code here\n');
+    }
+  };
 
   const handleSubmit = async () => {
     if (!localStorage.getItem('token')) {
@@ -95,7 +106,7 @@ const ProblemPage = () => {
         <div className="h-12 bg-[#252526] flex items-center justify-between px-4 border-b border-black/40">
           <select 
             value={language}
-            onChange={(e) => setLanguage(e.target.value)}
+            onChange={handleLanguageChange}
             className="bg-[#3c3c3c] text-white text-sm rounded px-2 py-1 outline-none focus:ring-1 focus:ring-brand"
           >
             <option value="javascript">JavaScript (Node.js)</option>

@@ -4,11 +4,11 @@ const redis = require('../config/redis');
 class AdminController {
   async createProblem(req, res, next) {
     try {
-      const { title, slug, difficulty, description, starter_code, runner_boilerplate_js } = req.body;
+      const { title, slug, difficulty, description, starter_codes, runner_boilerplates } = req.body;
       
       const result = await pool.query(
-        'INSERT INTO problems (title, slug, difficulty, description, starter_code, runner_boilerplate_js) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-        [title, slug, difficulty, description, starter_code, runner_boilerplate_js]
+        'INSERT INTO problems (title, slug, difficulty, description, starter_codes, runner_boilerplates) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+        [title, slug, difficulty, description, starter_codes, runner_boilerplates]
       );
       
       await redis.del('problems:all');
@@ -61,11 +61,11 @@ class AdminController {
   async updateProblem(req, res, next) {
     try {
       const { id } = req.params;
-      const { title, slug, difficulty, description, starter_code, runner_boilerplate_js } = req.body;
+      const { title, slug, difficulty, description, starter_codes, runner_boilerplates } = req.body;
       
       const result = await pool.query(
-        'UPDATE problems SET title=$1, slug=$2, difficulty=$3, description=$4, starter_code=$5, runner_boilerplate_js=$6 WHERE id=$7 RETURNING *',
-        [title, slug, difficulty, description, starter_code, runner_boilerplate_js, id]
+        'UPDATE problems SET title=$1, slug=$2, difficulty=$3, description=$4, starter_codes=$5, runner_boilerplates=$6 WHERE id=$7 RETURNING *',
+        [title, slug, difficulty, description, starter_codes, runner_boilerplates, id]
       );
       
       if (result.rows.length === 0) return res.status(404).json({ error: 'Problem not found' });

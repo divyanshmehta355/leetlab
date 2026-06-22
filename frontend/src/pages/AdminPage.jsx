@@ -14,10 +14,13 @@ function AdminPage() {
   const [slug, setSlug] = useState('');
   const [difficulty, setDifficulty] = useState('Easy');
   const [description, setDescription] = useState('');
-  const [starterCode, setStarterCode] = useState('');
-  const [runnerBoilerplate, setRunnerBoilerplate] = useState('');
+  const [starterCodes, setStarterCodes] = useState({ javascript: '', python: '' });
+  const [runnerBoilerplates, setRunnerBoilerplates] = useState({ javascript: '', python: '' });
   const [testcases, setTestcases] = useState([{ input: '', expected_output: '' }]);
   const [message, setMessage] = useState('');
+
+  // Language Tab State
+  const [activeTab, setActiveTab] = useState('javascript');
 
   useEffect(() => {
     if (view === 'list') {
@@ -42,11 +45,12 @@ function AdminPage() {
     setSlug('');
     setDifficulty('Easy');
     setDescription('');
-    setStarterCode('');
-    setRunnerBoilerplate('');
+    setStarterCodes({ javascript: '', python: '' });
+    setRunnerBoilerplates({ javascript: '', python: '' });
     setTestcases([{ input: '', expected_output: '' }]);
     setEditingId(null);
     setMessage('');
+    setActiveTab('javascript');
   };
 
   const openCreateForm = () => {
@@ -63,10 +67,11 @@ function AdminPage() {
       setSlug(p.slug);
       setDifficulty(p.difficulty);
       setDescription(p.description);
-      setStarterCode(p.starter_code);
-      setRunnerBoilerplate(p.runner_boilerplate_js || '');
+      setStarterCodes(p.starter_codes || { javascript: '', python: '' });
+      setRunnerBoilerplates(p.runner_boilerplates || { javascript: '', python: '' });
       setTestcases(p.testcases?.length ? p.testcases : [{ input: '', expected_output: '' }]);
       setEditingId(p.id);
+      setActiveTab('javascript');
       setView('form');
     } catch (err) {
       console.error(err);
@@ -95,12 +100,20 @@ function AdminPage() {
 
   const removeTestcase = (index) => setTestcases(testcases.filter((_, i) => i !== index));
 
+  const handleStarterCodeChange = (lang, value) => {
+    setStarterCodes(prev => ({ ...prev, [lang]: value }));
+  };
+
+  const handleRunnerBoilerplateChange = (lang, value) => {
+    setRunnerBoilerplates(prev => ({ ...prev, [lang]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
     
     try {
-      const payload = { title, slug, difficulty, description, starter_code: starterCode, runner_boilerplate_js: runnerBoilerplate };
+      const payload = { title, slug, difficulty, description, starter_codes: starterCodes, runner_boilerplates: runnerBoilerplates };
       let problemId = editingId;
 
       if (editingId) {
@@ -210,13 +223,45 @@ function AdminPage() {
               <label className="block text-sm font-medium text-slate-400 mb-1">Description (Markdown / HTML)</label>
               <textarea value={description} onChange={e => setDescription(e.target.value)} required rows={4} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white font-mono"></textarea>
             </div>
+          </div>
+
+          <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 space-y-4">
+            <h2 className="text-xl font-semibold mb-4 text-white">Language Specific Configuration</h2>
+            
+            <div className="flex gap-2 border-b border-slate-700 mb-4 pb-2">
+              <button 
+                type="button"
+                onClick={() => setActiveTab('javascript')}
+                className={`px-4 py-2 rounded font-medium transition-colors ${activeTab === 'javascript' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'}`}
+              >
+                JavaScript
+              </button>
+              <button 
+                type="button"
+                onClick={() => setActiveTab('python')}
+                className={`px-4 py-2 rounded font-medium transition-colors ${activeTab === 'python' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'}`}
+              >
+                Python
+              </button>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-slate-400 mb-1">Starter Code (User sees this)</label>
-              <textarea value={starterCode} onChange={e => setStarterCode(e.target.value)} required rows={4} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white font-mono"></textarea>
+              <textarea 
+                value={starterCodes[activeTab] || ''} 
+                onChange={e => handleStarterCodeChange(activeTab, e.target.value)} 
+                rows={4} 
+                className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white font-mono"
+              ></textarea>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Runner Boilerplate (JS) (Hidden)</label>
-              <textarea value={runnerBoilerplate} onChange={e => setRunnerBoilerplate(e.target.value)} required rows={6} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white font-mono"></textarea>
+              <label className="block text-sm font-medium text-slate-400 mb-1">Runner Boilerplate (Hidden)</label>
+              <textarea 
+                value={runnerBoilerplates[activeTab] || ''} 
+                onChange={e => handleRunnerBoilerplateChange(activeTab, e.target.value)} 
+                rows={6} 
+                className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white font-mono"
+              ></textarea>
             </div>
           </div>
 

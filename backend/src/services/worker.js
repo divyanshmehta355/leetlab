@@ -14,14 +14,15 @@ const worker = new Worker('submissions', async job => {
   try {
     const testCases = await submissionRepository.getTestCasesForProblem(problemId);
     
-    // Fetch problem runner_boilerplate_js
+    // Fetch problem runner_boilerplates
     const { pool } = require('../config/db');
-    const problemRes = await pool.query('SELECT runner_boilerplate_js FROM problems WHERE id = $1', [problemId]);
-    const boilerplate = problemRes.rows[0].runner_boilerplate_js;
+    const problemRes = await pool.query('SELECT runner_boilerplates FROM problems WHERE id = $1', [problemId]);
+    const boilerplates = problemRes.rows[0].runner_boilerplates || {};
+    const boilerplate = boilerplates[language];
 
     // Dynamically inject the runner boilerplate so the user doesn't have to see it or risk deleting it
     let finalCode = code;
-    if (language === 'javascript' && boilerplate) {
+    if (boilerplate) {
       finalCode += `\n${boilerplate}`;
     }
 
