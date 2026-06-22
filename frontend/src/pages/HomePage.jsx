@@ -1,97 +1,79 @@
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../services/api';
-import { Code2, ChevronRight, Activity } from 'lucide-react';
+import { Code2, Zap, Shield, ChevronRight } from 'lucide-react';
 
 const HomePage = () => {
-  const [problems, setProblems] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProblems = async () => {
-      try {
-        const response = await api.get('/problems');
-        setProblems(response.data);
-      } catch (error) {
-        console.error('Failed to fetch problems', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProblems();
-  }, []);
-
-  const getDifficultyColor = (difficulty) => {
-    switch(difficulty.toLowerCase()) {
-      case 'easy': return 'text-easy bg-easy/10 border-easy/20';
-      case 'medium': return 'text-medium bg-medium/10 border-medium/20';
-      case 'hard': return 'text-hard bg-hard/10 border-hard/20';
-      default: return 'text-text-muted bg-white/5 border-white/10';
-    }
-  };
-
   return (
-    <div className="max-w-6xl mx-auto w-full p-8 flex flex-col gap-8">
-      
-      <header className="flex flex-col gap-4 items-center text-center py-12">
-        <div className="p-4 rounded-full bg-brand/10 text-brand mb-4 ring-1 ring-brand/30 shadow-[0_0_30px_rgba(0,240,255,0.2)]">
-          <Code2 size={40} />
-        </div>
-        <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand to-accent pb-2">
-          Master Your Craft.
-        </h1>
-        <p className="text-lg text-text-muted max-w-2xl">
-          Level up your coding skills with our curated collection of algorithmic challenges. Built for the modern developer.
-        </p>
-      </header>
+    <div className="flex flex-col w-full">
+      {/* Hero Section */}
+      <section className="relative flex flex-col items-center justify-center min-h-[70vh] text-center px-6 overflow-hidden">
+        {/* Background glow effects */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none"></div>
 
-      <section className="flex flex-col gap-4">
-        <div className="flex items-center gap-2 mb-2">
-          <Activity className="text-brand" />
-          <h2 className="text-2xl font-bold">Trending Challenges</h2>
-        </div>
-
-        {loading ? (
-          <div className="flex justify-center p-12">
-            <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin"></div>
+        <div className="relative z-10 flex flex-col items-center gap-6 max-w-4xl">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-sm font-medium mb-4">
+            <Code2 size={16} />
+            <span>LeetLab v1.0 is Live</span>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {problems.map((problem) => (
-              <Link 
-                key={problem.id} 
-                to={`/problems/${problem.slug}`}
-                className="glass glass-hover p-6 rounded-2xl flex flex-col gap-4 group cursor-pointer relative overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full blur-3xl -mr-10 -mt-10 transition-all group-hover:bg-brand/10"></div>
-                
-                <div className="flex justify-between items-start z-10">
-                  <h3 className="text-xl font-bold text-text-main group-hover:text-brand transition-colors">
-                    {problem.title}
-                  </h3>
-                  <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${getDifficultyColor(problem.difficulty)}`}>
-                    {problem.difficulty}
-                  </span>
-                </div>
-                
-                <div className="flex-grow z-10">
-                  {/* Truncated description preview could go here */}
-                </div>
+          
+          <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-200 to-slate-500 leading-tight pb-2">
+            Master Algorithms.<br />Nail the Interview.
+          </h1>
+          
+          <p className="text-xl text-slate-400 max-w-2xl mt-4">
+            A premium, ultra-fast competitive programming environment built for modern developers. Practice coding challenges in a frictionless editor.
+          </p>
 
-                <div className="flex items-center text-sm font-medium text-brand mt-4 z-10 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                  Solve Problem <ChevronRight size={16} className="ml-1" />
-                </div>
-              </Link>
-            ))}
-            
-            {problems.length === 0 && !loading && (
-              <div className="col-span-full text-center p-12 glass rounded-2xl text-text-muted">
-                No problems found. Did you run the database migrations?
-              </div>
-            )}
+          <div className="flex items-center gap-4 mt-8">
+            <Link 
+              to="/problems" 
+              className="group flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-8 py-4 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]"
+            >
+              Explore Problems <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link 
+              to="/auth" 
+              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-xl font-bold transition-all border border-slate-700 hover:border-slate-600"
+            >
+              Create Account
+            </Link>
           </div>
-        )}
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="max-w-6xl mx-auto w-full px-6 py-24 border-t border-slate-800/50">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="flex flex-col gap-4 p-8 rounded-2xl bg-slate-900/50 border border-slate-800/50 hover:border-slate-700/50 transition-colors">
+            <div className="w-12 h-12 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-2">
+              <Zap size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-white">Lightning Fast</h3>
+            <p className="text-slate-400 leading-relaxed">
+              Powered by advanced execution engines, your code runs and evaluates in milliseconds, keeping you in the flow.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-4 p-8 rounded-2xl bg-slate-900/50 border border-slate-800/50 hover:border-slate-700/50 transition-colors">
+            <div className="w-12 h-12 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center mb-2">
+              <Code2 size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-white">Monaco Editor</h3>
+            <p className="text-slate-400 leading-relaxed">
+              Experience the exact same editor engine as VS Code, complete with syntax highlighting and auto-closing brackets.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-4 p-8 rounded-2xl bg-slate-900/50 border border-slate-800/50 hover:border-slate-700/50 transition-colors">
+            <div className="w-12 h-12 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-2">
+              <Shield size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-white">Secure Execution</h3>
+            <p className="text-slate-400 leading-relaxed">
+              Your submissions run inside strictly isolated sandboxes, ensuring consistent, secure, and reliable evaluations every time.
+            </p>
+          </div>
+        </div>
       </section>
     </div>
   );
