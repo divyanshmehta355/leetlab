@@ -1,7 +1,7 @@
 const { Worker } = require('bullmq');
 const redisConfig = require('../config/redis');
 const submissionRepository = require('../repositories/submissionRepository');
-const dockerExecutionService = require('./dockerExecutionService');
+const pistonExecutionService = require('./pistonExecutionService');
 
 const worker = new Worker('submissions', async job => {
   const { submissionId, problemId, language, code } = job.data;
@@ -15,7 +15,7 @@ const worker = new Worker('submissions', async job => {
     const testCases = await submissionRepository.getTestCasesForProblem(problemId);
 
     for (const testCase of testCases) {
-      const result = await dockerExecutionService.execute(language, code, testCase.input);
+      const result = await pistonExecutionService.execute(language, code, testCase.input);
 
       if (result.exitCode !== 0) {
         finalStatus = 'Error';
