@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { Edit2, Trash2, Plus, ArrowLeft } from 'lucide-react';
+import Editor from '@monaco-editor/react';
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -245,23 +246,32 @@ function AdminPage() {
               </button>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Starter Code (User sees this)</label>
-              <textarea 
-                value={starterCodes[activeTab] || ''} 
-                onChange={e => handleStarterCodeChange(activeTab, e.target.value)} 
-                rows={4} 
-                className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white font-mono"
-              ></textarea>
+            <div className="h-64 border border-slate-700 rounded overflow-hidden">
+              <div className="bg-slate-900 px-4 py-2 text-xs font-semibold text-slate-400 border-b border-slate-700">
+                Starter Code (User sees this)
+              </div>
+              <Editor
+                height="100%"
+                language={activeTab}
+                theme="vs-dark"
+                value={starterCodes[activeTab] || ''}
+                onChange={(val) => handleStarterCodeChange(activeTab, val)}
+                options={{ minimap: { enabled: false }, fontSize: 14 }}
+              />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Runner Boilerplate (Hidden)</label>
-              <textarea 
-                value={runnerBoilerplates[activeTab] || ''} 
-                onChange={e => handleRunnerBoilerplateChange(activeTab, e.target.value)} 
-                rows={6} 
-                className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white font-mono"
-              ></textarea>
+
+            <div className="h-64 border border-slate-700 rounded overflow-hidden mt-6">
+              <div className="bg-slate-900 px-4 py-2 text-xs font-semibold text-slate-400 border-b border-slate-700">
+                Runner Boilerplate (Hidden logic)
+              </div>
+              <Editor
+                height="100%"
+                language={activeTab}
+                theme="vs-dark"
+                value={runnerBoilerplates[activeTab] || ''}
+                onChange={(val) => handleRunnerBoilerplateChange(activeTab, val)}
+                options={{ minimap: { enabled: false }, fontSize: 14 }}
+              />
             </div>
           </div>
 
