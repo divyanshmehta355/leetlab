@@ -9,6 +9,10 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Global rate limiter
+const { globalLimiter } = require('./middlewares/rateLimiter');
+app.use(globalLimiter);
+
 // Basic health check route
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
