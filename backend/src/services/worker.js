@@ -55,6 +55,11 @@ const worker = new Worker('submissions', async job => {
   await submissionRepository.updateSubmissionStatus(submissionId, finalStatus, executionTime, memoryUsedKb);
   console.log(`Finished submission ${submissionId} with status ${finalStatus}`);
 
+  if (finalStatus === 'Accepted') {
+    const redis = require('../config/redis');
+    await redis.del('leaderboard:all');
+  }
+
 }, { connection: redisConfig });
 
 worker.on('failed', (job, err) => {

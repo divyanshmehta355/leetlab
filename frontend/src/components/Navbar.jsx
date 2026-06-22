@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Code2, LogOut, User } from 'lucide-react';
+import { Code2, LogOut, User, Trophy } from 'lucide-react';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -23,9 +23,12 @@ const Navbar = () => {
         </Link>
         
         <div className="hidden md:flex items-center gap-6">
-          <Link to="/problems" className="text-slate-300 hover:text-white font-medium transition-colors">
-            Problems
-          </Link>
+            <Link to="/problems" className="text-text-muted hover:text-white transition-colors text-sm font-medium">
+              Problems
+            </Link>
+            <Link to="/leaderboard" className="flex items-center gap-1.5 text-text-muted hover:text-yellow-400 transition-colors text-sm font-medium">
+              <Trophy size={16} /> Leaderboard
+            </Link>
           <Link to="/explore" className="text-slate-400 hover:text-white font-medium transition-colors">
             Explore
           </Link>

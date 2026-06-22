@@ -256,7 +256,7 @@ function AdminPage() {
                 theme="vs-dark"
                 value={starterCodes[activeTab] || ''}
                 onChange={(val) => handleStarterCodeChange(activeTab, val)}
-                options={{ minimap: { enabled: false }, fontSize: 14 }}
+                options={{ minimap: { enabled: false }, fontSize: 14, wordWrap: 'on', formatOnPaste: true }}
               />
             </div>
 
@@ -270,7 +270,7 @@ function AdminPage() {
                 theme="vs-dark"
                 value={runnerBoilerplates[activeTab] || ''}
                 onChange={(val) => handleRunnerBoilerplateChange(activeTab, val)}
-                options={{ minimap: { enabled: false }, fontSize: 14 }}
+                options={{ minimap: { enabled: false }, fontSize: 14, wordWrap: 'on', formatOnPaste: true }}
               />
             </div>
           </div>

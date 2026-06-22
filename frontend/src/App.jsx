@@ -1,10 +1,11 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
 import ProblemSetPage from './pages/ProblemSetPage';
 import ProblemPage from './pages/ProblemPage';
 import AuthPage from './pages/AuthPage';
 import AdminPage from './pages/AdminPage';
+import LeaderboardPage from './pages/LeaderboardPage';
 
 function App() {
   return (
@@ -18,6 +19,8 @@ function App() {
             <Route path="/problems/:slug" element={<ProblemPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
       </div>
