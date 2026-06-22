@@ -32,8 +32,12 @@ class DockerExecutionService {
 
     try {
       // Ensure image exists
-      // In production you'd pre-pull these
-      // await docker.pull(image); 
+      await new Promise((resolve, reject) => {
+        docker.pull(image, (err, stream) => {
+          if (err) return reject(err);
+          docker.modem.followProgress(stream, (err, res) => err ? reject(err) : resolve(res));
+        });
+      });
 
       const container = await docker.createContainer({
         Image: image,
