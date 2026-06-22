@@ -19,6 +19,9 @@ const Navbar = () => {
       </Link>
       
       <div className="flex items-center gap-4">
+        <Link to="/admin" className="text-slate-400 hover:text-cyan-400 font-medium transition-colors">
+          Admin Panel
+        </Link>
         {token ? (
           <>
             <div className="flex items-center gap-2 text-text-muted">

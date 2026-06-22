@@ -2,8 +2,12 @@ require('dotenv').config();
 const app = require('./src/app');
 const { pool } = require('./src/config/db');
 const redis = require('./src/config/redis');
+const adminRoutes = require('./src/routes/adminRoutes');
 
 const PORT = process.env.PORT || 3000;
+
+// Admin Routes
+app.use('/api/admin', adminRoutes);
 
 const startServer = async () => {
   try {

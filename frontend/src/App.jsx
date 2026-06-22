@@ -4,6 +4,8 @@ import HomePage from './pages/HomePage';
 import ProblemPage from './pages/ProblemPage';
 import AuthPage from './pages/AuthPage';
 
+import AdminPage from './pages/AdminPage';
+
 function App() {
   return (
     <Router>
@@ -14,6 +16,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/problems/:slug" element={<ProblemPage />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/admin" element={<AdminPage />} />
           </Routes>
         </main>
       </div>
