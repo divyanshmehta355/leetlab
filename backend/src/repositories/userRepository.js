@@ -30,14 +30,14 @@ class UserRepository {
     return rows[0];
   }
 
-  async updateProfile(id, bio, githubUrl, websiteUrl) {
+  async updateProfile(id, username, email, bio, githubUrl, websiteUrl) {
     const query = `
       UPDATE users
-      SET bio = $2, github_url = $3, website_url = $4
+      SET username = $2, email = $3, bio = $4, github_url = $5, website_url = $6
       WHERE id = $1
-      RETURNING id, username, email, bio, github_url, website_url;
+      RETURNING id, username, email, role, bio, github_url, website_url;
     `;
-    const { rows } = await pool.query(query, [id, bio, githubUrl, websiteUrl]);
+    const { rows } = await pool.query(query, [id, username, email, bio, githubUrl, websiteUrl]);
     return rows[0];
   }
 

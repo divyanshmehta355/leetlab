@@ -1,5 +1,6 @@
 const userRepository = require('../repositories/userRepository');
 const redis = require('../config/redis');
+const jwt = require('jsonwebtoken');
 
 class UserController {
   async getMe(req, res, next) {
@@ -14,13 +15,39 @@ class UserController {
 
   async updateProfile(req, res, next) {
     try {
-      const { bio, github_url, website_url } = req.body;
-      const updatedUser = await userRepository.updateProfile(req.user.id, bio, github_url, website_url);
+      const { username, email, bio, github_url, website_url } = req.body;
+      const currentUser = await userRepository.findById(req.user.id);
+
+      // Check if username changed and is taken
+      if (username !== currentUser.username) {
+        const existingUsername = await userRepository.findByUsername(username);
+        if (existingUsername) return res.status(400).json({ error: 'Username is already taken.' });
+      }
+
+      // Check if email changed and is taken
+      if (email !== currentUser.email) {
+        const existingEmail = await userRepository.findByEmail(email);
+        if (existingEmail) return res.status(400).json({ error: 'Email is already registered.' });
+      }
+
+      const updatedUser = await userRepository.updateProfile(req.user.id, username, email, bio, github_url, website_url);
       
-      // Invalidate profile cache
+      // Invalidate old and new profile cache
+      await redis.del(`profile:${currentUser.username}`);
       await redis.del(`profile:${updatedUser.username}`);
 
-      res.json(updatedUser);
+      // Generate new token
+      const payload = {
+        user: {
+          id: updatedUser.id,
+          username: updatedUser.username,
+          email: updatedUser.email,
+          role: updatedUser.role
+        }
+      };
+      const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+      res.json({ token, user: updatedUser });
     } catch (error) {
       next(error);
     }
