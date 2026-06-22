@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { Edit2, Trash2, Plus, ArrowLeft } from 'lucide-react';
 
 function AdminPage() {
   const navigate = useNavigate();
-  const [secret, setSecret] = useState(localStorage.getItem('adminSecret') || '');
   const [view, setView] = useState('list'); // 'list' | 'form'
   const [problems, setProblems] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -21,28 +20,21 @@ function AdminPage() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    if (view === 'list' && secret) {
+    if (view === 'list') {
       fetchProblems();
     }
-  }, [view, secret]);
+  }, [view]);
 
   const fetchProblems = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/admin/problems', {
-        headers: { 'x-admin-secret': secret }
-      });
+      const res = await api.get('/admin/problems');
       setProblems(res.data);
     } catch (err) {
       console.error(err);
-      if (err.response?.status === 401) {
-        setMessage('Unauthorized. Please check your admin secret.');
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setMessage('Unauthorized. You must be an admin to view this page.');
       }
     }
-  };
-
-  const handleSecretChange = (e) => {
-    setSecret(e.target.value);
-    localStorage.setItem('adminSecret', e.target.value);
   };
 
   const resetForm = () => {
@@ -65,9 +57,7 @@ function AdminPage() {
   const openEditForm = async (id) => {
     setMessage('');
     try {
-      const res = await axios.get(`http://localhost:3000/api/admin/problems/${id}`, {
-        headers: { 'x-admin-secret': secret }
-      });
+      const res = await api.get(`/admin/problems/${id}`);
       const p = res.data;
       setTitle(p.title);
       setSlug(p.slug);
@@ -87,9 +77,7 @@ function AdminPage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this problem?')) return;
     try {
-      await axios.delete(`http://localhost:3000/api/admin/problems/${id}`, {
-        headers: { 'x-admin-secret': secret }
-      });
+      await api.delete(`/admin/problems/${id}`);
       fetchProblems();
     } catch (err) {
       console.error(err);
@@ -116,15 +104,15 @@ function AdminPage() {
       let problemId = editingId;
 
       if (editingId) {
-        await axios.put(`http://localhost:3000/api/admin/problems/${editingId}`, payload, { headers: { 'x-admin-secret': secret } });
+        await api.put(`/admin/problems/${editingId}`, payload);
       } else {
-        const res = await axios.post('http://localhost:3000/api/admin/problems', payload, { headers: { 'x-admin-secret': secret } });
+        const res = await api.post('/admin/problems', payload);
         problemId = res.data.id;
       }
 
       for (const tc of testcases) {
         if (tc.input && tc.expected_output) {
-          await axios.post(`http://localhost:3000/api/admin/problems/${problemId}/testcases`, tc, { headers: { 'x-admin-secret': secret } });
+          await api.post(`/admin/problems/${problemId}/testcases`, tc);
         }
       }
 
@@ -145,24 +133,6 @@ function AdminPage() {
             <ArrowLeft size={20} /> Back to List
           </button>
         )}
-      </div>
-
-      <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 mb-8">
-        <label className="block text-sm font-medium text-slate-400 mb-1">Admin Secret</label>
-        <div className="flex gap-4">
-          <input
-            type="password"
-            value={secret}
-            onChange={handleSecretChange}
-            className="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-white focus:outline-none focus:border-cyan-500"
-            placeholder="Enter Admin Secret..."
-          />
-          {view === 'list' && (
-            <button onClick={fetchProblems} className="bg-slate-700 hover:bg-slate-600 text-white px-6 rounded transition-colors">
-              Refresh
-            </button>
-          )}
-        </div>
       </div>
 
       {message && (

@@ -4,6 +4,7 @@ import { Code2, LogOut, User } from 'lucide-react';
 const Navbar = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -32,14 +33,16 @@ const Navbar = () => {
       </div>
       
       <div className="flex items-center gap-4">
-        <Link to="/admin" className="text-slate-400 hover:text-cyan-400 font-medium transition-colors">
-          Admin Panel
-        </Link>
-        {token ? (
+        {user?.role === 'admin' && (
+          <Link to="/admin" className="text-slate-400 hover:text-cyan-400 font-medium transition-colors">
+            Admin Panel
+          </Link>
+        )}
+        {token && user ? (
           <>
             <div className="flex items-center gap-2 text-text-muted">
               <User size={18} />
-              <span className="text-sm font-medium">Developer</span>
+              <span className="text-sm font-medium capitalize">{user.role}</span>
             </div>
             <button 
               onClick={handleLogout}

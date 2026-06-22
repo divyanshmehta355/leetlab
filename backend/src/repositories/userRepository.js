@@ -5,7 +5,7 @@ class UserRepository {
     const query = `
       INSERT INTO users (username, email, password_hash)
       VALUES ($1, $2, $3)
-      RETURNING id, username, email, created_at;
+      RETURNING id, username, email, role, created_at;
     `;
     const values = [username, email, passwordHash];
     const { rows } = await pool.query(query, values);
@@ -25,7 +25,7 @@ class UserRepository {
   }
 
   async findById(id) {
-    const query = 'SELECT id, username, email, created_at FROM users WHERE id = $1;';
+    const query = 'SELECT id, username, email, role, created_at FROM users WHERE id = $1;';
     const { rows } = await pool.query(query, [id]);
     return rows[0];
   }

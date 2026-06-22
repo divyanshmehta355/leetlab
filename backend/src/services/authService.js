@@ -40,7 +40,8 @@ class AuthService {
       user: {
         id: user.id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        role: user.role
       }
     };
 
@@ -51,7 +52,8 @@ class AuthService {
       user: {
         id: user.id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        role: user.role
       }
     };
   }
