@@ -85,7 +85,12 @@ class DockerExecutionService {
         }
       }
 
-      await container.remove();
+      try {
+        await container.remove({ force: true });
+      } catch (e) {
+        // Ignore 409 already in progress errors
+      }
+      
       await fs.rm(tempDir, { recursive: true, force: true });
 
       return {
