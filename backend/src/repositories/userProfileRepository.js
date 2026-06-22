@@ -3,7 +3,7 @@ const { pool } = require('../config/db');
 class UserProfileRepository {
   async getUserProfile(username) {
     // 1. Get basic user info
-    const userQuery = 'SELECT id, username, created_at FROM users WHERE username = $1';
+    const userQuery = 'SELECT id, username, bio, github_url, website_url, created_at FROM users WHERE username = $1';
     const userRes = await pool.query(userQuery, [username]);
     if (userRes.rows.length === 0) return null;
     const user = userRes.rows[0];
@@ -91,6 +91,9 @@ class UserProfileRepository {
       user: {
         id: user.id,
         username: user.username,
+        bio: user.bio,
+        github_url: user.github_url,
+        website_url: user.website_url,
         joined_at: user.created_at
       },
       stats: {

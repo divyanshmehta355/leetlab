@@ -1,27 +1,52 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { Trophy, Code2, Medal, Clock, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
+import { Trophy, Code2, Medal, Clock, CheckCircle2, Loader2, ArrowLeft, Github, Globe, Edit3, Trash2 } from 'lucide-react';
+import EditProfileModal from '../components/EditProfileModal';
 
 const ProfilePage = () => {
   const { username } = useParams();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+  const isOwner = currentUser?.username === username;
+
+  const fetchProfile = async () => {
+    try {
+      const res = await api.get(`/profiles/${username}`);
+      setProfile(res.data);
+    } catch (err) {
+      setError('User not found.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await api.get(`/profiles/${username}`);
-        setProfile(res.data);
-      } catch (err) {
-        setError('User not found.');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchProfile();
   }, [username]);
+
+  const handleDeleteAccount = async () => {
+    if (!window.confirm('Are you absolutely sure you want to permanently delete your account? This action cannot be undone.')) {
+      return;
+    }
+    setDeleting(true);
+    try {
+      await api.delete('/users/me');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      navigate('/');
+    } catch (err) {
+      alert('Failed to delete account');
+      setDeleting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -59,18 +84,53 @@ const ProfilePage = () => {
     <div className="max-w-6xl mx-auto py-12 px-6 w-full">
       
       {/* Top Banner & Profile Info */}
-      <div className="bg-slate-900/60 rounded-2xl border border-slate-700/50 p-8 shadow-xl backdrop-blur-md mb-8 flex items-center gap-8">
-        <div className={`w-32 h-32 rounded-full flex items-center justify-center text-5xl font-bold text-white shadow-lg ${avatarColor}`}>
+      <div className="bg-slate-900/60 rounded-2xl border border-slate-700/50 p-8 shadow-xl backdrop-blur-md mb-8 flex items-center gap-8 relative overflow-hidden">
+        
+        {/* Owner Controls */}
+        {isOwner && (
+          <div className="absolute top-4 right-4 flex gap-3">
+            <button 
+              onClick={() => setIsEditModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-cyan-400 bg-cyan-400/10 hover:bg-cyan-400/20 rounded-lg transition-colors border border-cyan-400/30"
+            >
+              <Edit3 size={14} /> Edit Profile
+            </button>
+            <button 
+              onClick={handleDeleteAccount}
+              disabled={deleting}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-400 bg-rose-400/10 hover:bg-rose-400/20 rounded-lg transition-colors border border-rose-400/30 disabled:opacity-50"
+            >
+              <Trash2 size={14} /> Delete Account
+            </button>
+          </div>
+        )}
+
+        <div className={`w-32 h-32 rounded-full flex items-center justify-center text-5xl font-bold text-white shadow-lg shrink-0 ${avatarColor}`}>
           {initial}
         </div>
-        <div>
+        <div className="flex-grow">
           <h1 className="text-4xl font-bold text-white mb-2">{user.username}</h1>
-          <div className="text-slate-400 flex items-center gap-2">
-            <Clock size={16} /> Joined {new Date(user.joined_at).toLocaleDateString()}
+          <div className="text-slate-400 flex items-center gap-4 text-sm mb-4">
+            <span className="flex items-center gap-1.5"><Clock size={16} /> Joined {new Date(user.joined_at).toLocaleDateString()}</span>
+            
+            {user.github_url && (
+              <a href={user.github_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-white transition-colors">
+                <Github size={16} /> GitHub
+              </a>
+            )}
+            {user.website_url && (
+              <a href={user.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-white transition-colors">
+                <Globe size={16} /> Website
+              </a>
+            )}
           </div>
+          
+          {user.bio && (
+            <p className="text-slate-300 max-w-2xl leading-relaxed whitespace-pre-wrap">{user.bio}</p>
+          )}
         </div>
         
-        <div className="ml-auto flex gap-6">
+        <div className="shrink-0 flex gap-6 mt-6 md:mt-0">
           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 text-center min-w-[140px]">
             <div className="text-slate-400 text-sm font-medium mb-1">Global Rank</div>
             <div className="text-3xl font-bold text-white flex items-center justify-center gap-2">
@@ -179,6 +239,16 @@ const ProfilePage = () => {
         </div>
 
       </div>
+
+      <EditProfileModal 
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        user={user}
+        onSaved={() => {
+          setIsEditModalOpen(false);
+          fetchProfile(); // refresh data
+        }}
+      />
     </div>
   );
 };
