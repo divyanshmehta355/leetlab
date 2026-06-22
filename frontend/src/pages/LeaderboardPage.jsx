@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
-import { Trophy, Medal, Award, Flame, User } from 'lucide-react';
+import { Trophy, Medal, Award, Flame, User, Loader2 } from 'lucide-react';
 
 const LeaderboardPage = () => {
   const [users, setUsers] = useState([]);
@@ -89,12 +90,12 @@ const LeaderboardPage = () => {
                     {RankIcon}
                   </td>
                   <td className="py-4 px-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center border border-slate-600 shadow-inner">
-                        <User className="text-slate-400" size={20} />
+                    <Link to={`/user/${user.username}`} className="flex items-center gap-3 group">
+                      <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center border border-slate-600 shadow-inner group-hover:border-cyan-400 transition-colors">
+                        <User className="text-slate-400 group-hover:text-cyan-400 transition-colors" size={20} />
                       </div>
-                      <span className="text-white font-semibold text-lg">{user.username}</span>
-                    </div>
+                      <span className="text-white font-semibold text-lg group-hover:text-cyan-400 transition-colors">{user.username}</span>
+                    </Link>
                   </td>
                   <td className="py-4 px-6 text-center">
                     <span className="bg-slate-800 text-slate-300 px-3 py-1 rounded-full text-sm font-medium border border-slate-700">

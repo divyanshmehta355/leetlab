@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { ThumbsUp, MessageSquare, Loader2, Code2, User } from 'lucide-react';
 
@@ -60,9 +61,9 @@ const SolutionList = ({ problemId, refreshTrigger }) => {
             <div>
               <h3 className="text-lg font-bold text-white mb-2">{sol.title}</h3>
               <div className="flex items-center gap-3 text-sm text-slate-400">
-                <span className="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded">
+                <Link to={`/user/${sol.username}`} className="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded transition-colors text-slate-300 hover:text-white">
                   <User size={14} /> {sol.username}
-                </span>
+                </Link>
                 <span className="flex items-center gap-1 bg-cyan-900/30 text-cyan-400 px-2 py-1 rounded border border-cyan-800/50">
                   <Code2 size={14} /> {sol.language}
                 </span>

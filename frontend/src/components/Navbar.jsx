@@ -43,9 +43,14 @@ const Navbar = () => {
         )}
         {token && user ? (
           <>
-            <div className="flex items-center gap-2 text-text-muted">
-              <User size={18} />
-              <span className="text-sm font-medium capitalize">{user.role}</span>
+            <div className="flex items-center gap-4 text-text-muted">
+              <Link to={`/user/${user.username}`} className="flex items-center gap-2 hover:text-white transition-colors">
+                <User size={18} />
+                <span className="text-sm font-medium">{user.username}</span>
+              </Link>
+              {user.role === 'admin' && (
+                <span className="text-xs bg-brand/20 text-brand px-2 py-0.5 rounded uppercase font-bold">Admin</span>
+              )}
             </div>
             <button 
               onClick={handleLogout}

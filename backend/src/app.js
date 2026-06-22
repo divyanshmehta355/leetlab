@@ -16,6 +16,7 @@ const problemRoutes = require('./routes/problemRoutes');
 const submissionRoutes = require('./routes/submissionRoutes');
 const leaderboardRoutes = require('./routes/leaderboardRoutes');
 const solutionRoutes = require('./routes/solutionRoutes');
+const profileRoutes = require('./routes/profileRoutes');
 
 // Routes will be mounted here
 app.use('/api/auth', authRoutes);
@@ -23,6 +24,7 @@ app.use('/api/problems', problemRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api', solutionRoutes);
+app.use('/api/profiles', profileRoutes);
 
 // Central error handler
 app.use((err, req, res, next) => {
