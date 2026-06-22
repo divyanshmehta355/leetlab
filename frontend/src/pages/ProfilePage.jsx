@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { Trophy, Code2, Medal, Clock, CheckCircle2, Loader2, ArrowLeft, Github, Globe, Edit3, Trash2 } from 'lucide-react';
+import { Trophy, Code2, Medal, Clock, CheckCircle2, Loader2, ArrowLeft, Globe, Edit3, Trash2 } from 'lucide-react';
 import EditProfileModal from '../components/EditProfileModal';
 
 const ProfilePage = () => {
@@ -115,7 +115,7 @@ const ProfilePage = () => {
             
             {user.github_url && (
               <a href={user.github_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-white transition-colors">
-                <Github size={16} /> GitHub
+                <Code2 size={16} /> GitHub
               </a>
             )}
             {user.website_url && (
